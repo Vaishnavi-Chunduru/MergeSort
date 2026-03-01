@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Sort Recursion Tree</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+       
+        body {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 15px;
+            min-height: 100vh;
+        }
+       
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+       
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #60a5fa;
+            font-size: 1.8rem;
+        }
+       
+        .input-section {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #334155;
+        }
+       
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+       
+        input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+       
+        button {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+       
+        button:hover {
+            background: #2563eb;
+        }
+       
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+       
+        .speed-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+       
+        .speed-control input[type="range"] {
+            flex: 1;
+            max-width: 200px;
+            height: 6px;
+            background: #475569;
+            border-radius: 3px;
+            outline: none;
+        }
+       
+        .speed-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #60a5fa;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+       
+        .speed-value {
+            min-width: 40px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+       
+        .tree-container {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            min-height: 500px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: auto;
+        }
+       
+        .tree {
+            position: relative;
+            min-height: 400px;
+            padding: 20px;
+        }
+       
+        .level {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            min-height: 100px;
+            margin-bottom: 80px;
+        }
+       
+        .node {
+            padding: 8px 12px;
+            background: #0f172a;
+            border: 2px solid #475569;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 100px;
+            position: relative;
+            transition: all 0.4s ease;
+            z-index: 10;
+            margin: 0 10px;
+        }
+       
+        .node.active {
+            border-color: #60a5fa;
+            background: #1e3a8a;
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+        }
+       
+        .node.splitting {
+            border-color: #f59e0b;
+            background: #78350f;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+       
+        .node.merging {
+            border-color: #10b981;
+            background: #064e3b;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+       
+        .node.sorted {
+            border-color: #34d399;
+            background: #065f46;
+            color: #9fffe0;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+        }
+       
+        .node-content {
+            font-weight: bold;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+       
+        .node-label {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+       
+        /* Branch lines */
+        .branch {
+            position: absolute;
+            background: #475569;
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+       
+        .branch.horizontal {
+            height: 2px;
+        }
+       
+        .branch.vertical {
+            width: 2px;
+        }
+       
+        .branch.active {
+            background: #60a5fa;
+            box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
+        }
+       
+        .branch.splitting {
+            background: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+        }
+       
+        .branch.merging {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+        }
+       
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+       
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+        }
+       
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 4px;
+        }
+       
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+       
+        .step-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #60a5fa;
+            font-size: 14px;
+            text-align: center;
+        }
+       
+        @media (max-width: 1024px) {
+            .level {
+                margin-bottom: 60px;
+            }
+            .node {
+                min-width: 80px;
+                padding: 6px 10px;
+                margin: 0 5px;
+            }
+            .node-content {
+                font-size: 12px;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+       
+        @media (max-width: 768px) {
+            .level {
+                margin-bottom: 40px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .node {
+                min-width: 70px;
+                padding: 5px 8px;
+                margin: 5px;
+            }
+            .node-content {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Merge Sort Recursion Tree</h1>
+       
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="arrayInput"
+                       value="56, 29, 35, 42, 15, 41, 75, 21"
+                       placeholder="Enter numbers separated by commas">
+                <button id="startBtn">Start Sort</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+           
+            <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" id="speedSlider" min="800" max="3000" value="1200">
+                <span class="speed-value" id="speedValue">1.2s</span>
+            </div>
+        </div>
+       
+        <div class="step-info" id="stepInfo">
+            Enter an array and click "Start Sort" to begin
+        </div>
+       
+        <div class="tree-container">
+            <div class="tree" id="treeContainer">
+                <div style="text-align: center; padding: 60px; color: #94a3b8; font-size: 16px;">
+                    Enter an array and click "Start Sort" to see the recursion tree<br>
+                    <span style="color:#f59e0b;">Orange</span> = Splitting, <span style="color:#10b981;">Green</span> = Merging
+                </div>
+            </div>
+        </div>
+       
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="comparisonCount">0</div>
+                <div class="stat-label">Comparisons</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="splitCount">0</div>
+                <div class="stat-label">Splits</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="mergeCount">0</div>
+                <div class="stat-label">Merges</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stepCount">0</div>
+                <div class="stat-label">Steps</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const arrayInput = document.getElementById('arrayInput');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const treeContainer = document.getElementById('treeContainer');
+        const stepInfo = document.getElementById('stepInfo');
+        const comparisonCount = document.getElementById('comparisonCount');
+        const splitCount = document.getElementById('splitCount');
+        const mergeCount = document.getElementById('mergeCount');
+        const stepCount = document.getElementById('stepCount');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+       
+        // Animation Speed
+        let animationDelay = 1200;
+        
+        // State
+        let originalArray = [];
+        let treeData = [];
+        let steps = [];
+        let currentStep = 0;
+        let isSorting = false;
+        let nodePositions = new Map();
+       
+        // Stats
+        let comparisons = 0;
+        let splits = 0;
+        let merges = 0;
+        let totalSteps = 0;
+       
+        // Speed slider handler
+        speedSlider.addEventListener('input', (e) => {
+            animationDelay = parseInt(e.target.value);
+            const seconds = (animationDelay / 1000).toFixed(1);
+            speedValue.textContent = `${seconds}s`;
+        });
+       
+        function parseArrayInput() {
+            const input = arrayInput.value.trim();
+            if (!input) {
+                stepInfo.textContent = "Please enter an array of numbers";
+                return null;
+            }
+           
+            try {
+                const numbers = input.split(',')
+                    .map(num => num.trim())
+                    .filter(num => num !== '')
+                    .map(num => {
+                        const parsed = parseInt(num);
+                        if (isNaN(parsed)) throw new Error();
+                        return parsed;
+                    });
+               
+                if (numbers.length < 2) {
+                    stepInfo.textContent = "Enter at least 2 numbers";
+                    return null;
+                }
+                if (numbers.length > 15) {
+                    stepInfo.textContent = "Maximum 15 numbers for clear visualization";
+                    return null;
+                }
+               
+                return numbers;
+            } catch {
+                stepInfo.textContent = "Invalid input. Use numbers separated by commas.";
+                return null;
+            }
+        }
+       
+        function generateTreeData(arr, depth = 0, path = 'root', start = 0, end = arr.length - 1) {
+            if (!treeData[depth]) treeData[depth] = [];
+           
+            const nodeId = `${depth}-${path}`;
+            const nodeArray = arr.slice(start, end + 1);
+            const node = {
+                id: nodeId,
+                array: nodeArray,
+                sortedArray: null,
+                depth: depth,
+                path: path,
+                isLeaf: start === end,
+                start: start,
+                end: end,
+                children: [],
+                index: treeData[depth].length // Track position in level
+            };
+           
+            treeData[depth].push(node);
+           
+            if (start < end) {
+                const mid = Math.floor((start + end) / 2);
+                const leftChild = generateTreeData(arr, depth + 1, `${path}.left`, start, mid);
+                const rightChild = generateTreeData(arr, depth + 1, `${path}.right`, mid + 1, end);
+                node.children.push(leftChild);
+                node.children.push(rightChild);
+            }
+           
+            return node;
+        }
+       
+        function merge(left, right) {
+            let result = [];
+            let i = 0, j = 0;
+           
+            while (i < left.length && j < right.length) {
+                comparisons++;
+                if (left[i] <= right[j]) {
+                    result.push(left[i++]);
+                } else {
+                    result.push(right[j++]);
+                }
+            }
+           
+            return result.concat(left.slice(i)).concat(right.slice(j));
+        }
+       
+        function mergeSortWithSteps(arr, depth = 0, path = 'root', start = 0, end = arr.length - 1) {
+            if (start >= end) {
+                steps.push({
+                    type: 'leaf',
+                    nodeId: `${depth}-${path}`,
+                    array: [arr[start]],
+                    message: `Leaf node: [${arr[start]}] is already sorted`,
+                });
+                return [arr[start]];
+            }
+           
+            const mid = Math.floor((start + end) / 2);
+            splits++;
+           
+            steps.push({
+                type: 'split',
+                nodeId: `${depth}-${path}`,
+                array: arr.slice(start, end + 1),
+                message: `Splitting [${arr.slice(start, end + 1).join(', ')}] into [${arr.slice(start, mid + 1).join(', ')}] and [${arr.slice(mid + 1, end + 1).join(', ')}]`,
+            });
+           
+            const left = mergeSortWithSteps(arr, depth + 1, `${path}.left`, start, mid);
+            const right = mergeSortWithSteps(arr, depth + 1, `${path}.right`, mid + 1, end);
+           
+            const merged = merge(left, right);
+            merges++;
+           
+            steps.push({
+                type: 'merge',
+                nodeId: `${depth}-${path}`,
+                array: merged,
+                leftArray: left,
+                rightArray: right,
+                message: `Merging [${left.join(', ')}] + [${right.join(', ')}] → [${merged.join(', ')}]`,
+            });
+           
+            return merged;
+        }
+       
+        function calculateTreeLayout() {
+            // Calculate positions for each node
+            const maxDepth = treeData.length;
+            const levelPositions = [];
+            
+            for (let depth = maxDepth - 1; depth >= 0; depth--) {
+                const nodes = treeData[depth];
+                const positions = [];
+                
+                // Calculate node width based on content
+                nodes.forEach((node, index) => {
+                    const content = node.sortedArray || node.array;
+                    const contentLength = content.join(' ').length * 8 + 50; // Approximate width
+                    
+                    // Position nodes evenly
+                    let left;
+                    if (depth === maxDepth - 1) {
+                        // Leaf nodes: spread evenly
+                        left = index * 150;
+                    } else {
+                        // Parent nodes: position between children
+                        if (node.children.length === 2) {
+                            const leftChildPos = levelPositions[depth + 1].find(p => p.node === node.children[0]);
+                            const rightChildPos = levelPositions[depth + 1].find(p => p.node === node.children[1]);
+                            if (leftChildPos && rightChildPos) {
+                                left = (leftChildPos.left + rightChildPos.left) / 2;
+                            } else {
+                                left = index * 200;
+                            }
+                        } else {
+                            left = index * 200;
+                        }
+                    }
+                    
+                    positions.push({
+                        node: node,
+                        left: left,
+                        top: depth * 100,
+                        width: Math.max(80, contentLength)
+                    });
+                });
+                
+                levelPositions[depth] = positions;
+            }
+            
+            return levelPositions;
+        }
+       
+        function renderTree(highlightNodeId = null, highlightClass = '') {
+            treeContainer.innerHTML = '';
+            const tree = document.createElement('div');
+            tree.className = 'tree';
+            treeContainer.appendChild(tree);
+           
+            const levelPositions = calculateTreeLayout();
+            
+            // Render nodes
+            levelPositions.forEach((positions, depth) => {
+                const level = document.createElement('div');
+                level.className = 'level';
+                
+                positions.forEach(pos => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'node';
+                    nodeEl.id = pos.node.id;
+                    nodeEl.style.left = `${pos.left}px`;
+                    nodeEl.style.top = `${pos.top}px`;
+                    nodeEl.style.position = 'absolute';
+                    nodeEl.style.minWidth = `${pos.width}px`;
+                   
+                    if (pos.node.id === highlightNodeId) {
+                        nodeEl.classList.add(highlightClass);
+                    }
+                   
+                    const displayArray = pos.node.sortedArray || pos.node.array;
+                    const content = document.createElement('div');
+                    content.className = 'node-content';
+                    content.textContent = displayArray.join(' ');
+                   
+                    const label = document.createElement('div');
+                    label.className = 'node-label';
+                    if (depth === 0) label.textContent = 'Root';
+                    else if (pos.node.path.endsWith('.left')) label.textContent = 'L';
+                    else label.textContent = 'R';
+                    if (pos.node.isLeaf) label.textContent += ' (Leaf)';
+                   
+                    if (pos.node.sortedArray) {
+                        nodeEl.classList.add('sorted');
+                    }
+                   
+                    nodeEl.appendChild(content);
+                    nodeEl.appendChild(label);
+                    level.appendChild(nodeEl);
+                });
+               
+                tree.appendChild(level);
+            });
+            
+            // Draw branches after nodes are rendered
+            setTimeout(() => drawBranches(levelPositions, highlightClass), 10);
+        }
+       
+        function drawBranches(levelPositions, highlightClass = '') {
+            // Clear existing branches
+            document.querySelectorAll('.branch').forEach(el => el.remove());
+            
+            const tree = document.querySelector('.tree');
+            
+            // Draw branches for each parent node
+            for (let depth = 0; depth < levelPositions.length - 1; depth++) {
+                const parentPositions = levelPositions[depth];
+                
+                parentPositions.forEach(parentPos => {
+                    const parentNode = parentPos.node;
+                    
+                    if (parentNode.children && parentNode.children.length === 2) {
+                        // Find child positions
+                        const leftChildPos = levelPositions[depth + 1].find(p => p.node === parentNode.children[0]);
+                        const rightChildPos = levelPositions[depth + 1].find(p => p.node === parentNode.children[1]);
+                        
+                        if (leftChildPos) {
+                            drawBranchToChild(parentPos, leftChildPos, tree, highlightClass);
+                        }
+                        if (rightChildPos) {
+                            drawBranchToChild(parentPos, rightChildPos, tree, highlightClass);
+                        }
+                    }
+                });
+            }
+        }
+       
+        function drawBranchToChild(parentPos, childPos, tree, highlightClass = '') {
+            const parentEl = document.getElementById(parentPos.node.id);
+            const childEl = document.getElementById(childPos.node.id);
+            
+            if (!parentEl || !childEl) return;
+            
+            const parentRect = parentEl.getBoundingClientRect();
+            const childRect = childEl.getBoundingClientRect();
+            const treeRect = tree.getBoundingClientRect();
+            
+            // Calculate positions relative to tree
+            const parentX = parentRect.left + parentRect.width / 2 - treeRect.left;
+            const parentY = parentRect.bottom - treeRect.top;
+            const childX = childRect.left + childRect.width / 2 - treeRect.left;
+            const childY = childRect.top - treeRect.top;
+            
+            // Calculate branch length
+            const branchLength = Math.sqrt(Math.pow(childX - parentX, 2) + Math.pow(childY - parentY, 2));
+            const angle = Math.atan2(childY - parentY, childX - parentX) * 180 / Math.PI;
+            
+            // Create branch element
+            const branch = document.createElement('div');
+            branch.className = `branch ${highlightClass}`;
+            branch.style.left = `${parentX}px`;
+            branch.style.top = `${parentY}px`;
+            branch.style.width = `${branchLength}px`;
+            branch.style.height = '2px';
+            branch.style.transform = `rotate(${angle}deg)`;
+            branch.style.transformOrigin = '0 0';
+            
+            tree.appendChild(branch);
+        }
+       
+        function initializeVisualization() {
+            const numbers = parseArrayInput();
+            if (!numbers) return false;
+           
+            originalArray = [...numbers];
+            treeData = [];
+            steps = [];
+            currentStep = 0;
+            comparisons = splits = merges = totalSteps = 0;
+            updateStats();
+           
+            generateTreeData(numbers);
+            mergeSortWithSteps([...numbers]);
+           
+            steps.push({
+                type: 'sorted',
+                nodeId: '0-root',
+                array: [...numbers].sort((a,b)=>a-b),
+                message: `Merge Sort Complete! Final sorted array: [${[...numbers].sort((a,b)=>a-b).join(', ')}]`,
+            });
+           
+            renderTree();
+            return true;
+        }
+       
+        function executeNextStep() {
+            if (currentStep >= steps.length) {
+                finishSorting();
+                return;
+            }
+           
+            const step = steps[currentStep];
+            totalSteps++;
+           
+            stepInfo.textContent = step.message;
+           
+            let highlightClass = '';
+            if (step.type === 'split') highlightClass = 'splitting';
+            else if (step.type === 'merge') highlightClass = 'merging';
+            else if (step.type === 'leaf' || step.type === 'sorted') highlightClass = 'sorted';
+            else highlightClass = 'active';
+           
+            if (step.type === 'merge' || step.type === 'leaf') {
+                const node = treeData.flat().find(n => n.id === step.nodeId);
+                if (node) node.sortedArray = step.array;
+            }
+           
+            renderTree(step.nodeId, highlightClass);
+            updateStats();
+           
+            currentStep++;
+        }
+       
+        function updateStats() {
+            comparisonCount.textContent = comparisons;
+            splitCount.textContent = splits;
+            mergeCount.textContent = merges;
+            stepCount.textContent = totalSteps;
+        }
+       
+        function startVisualization() {
+            if (!initializeVisualization()) return;
+            isSorting = true;
+            startBtn.disabled = true;
+           
+            let i = 0;
+            function next() {
+                if (i < steps.length) {
+                    currentStep = i++;
+                    executeNextStep();
+                    setTimeout(next, animationDelay);
+                } else {
+                    setTimeout(() => {
+                        isSorting = false;
+                        startBtn.disabled = false;
+                    }, 1000);
+                }
+            }
+            next();
+        }
+       
+        function finishSorting() {
+            isSorting = false;
+            startBtn.disabled = false;
+        }
+       
+        function resetVisualization() {
+            isSorting = false;
+            currentStep = 0;
+            comparisons = splits = merges = totalSteps = 0;
+            updateStats();
+            treeContainer.innerHTML = '<div style="text-align: center; padding: 60px; color: #94a3b8; font-size: 16px;">Enter an array and click "Start Sort" to see the recursion tree<br><span style="color:#f59e0b;">Orange</span> = Splitting, <span style="color:#10b981;">Green</span> = Merging</div>';
+            stepInfo.textContent = 'Enter an array and click "Start Sort" to begin';
+            startBtn.disabled = false;
+            animationDelay = 1200;
+            speedSlider.value = 1200;
+            speedValue.textContent = '1.2s';
+        }
+       
+        // Event listeners
+        startBtn.addEventListener('click', startVisualization);
+        resetBtn.addEventListener('click', resetVisualization);
+        arrayInput.addEventListener('keypress', e => e.key === 'Enter' && startVisualization());
+       
+        resetVisualization();
+    </script>
+</body>
+</html>
