@@ -112,6 +112,3 @@ This project helps in understanding:
 ## Author
 **Vaishnavi**  
 B.Tech Computer Science Student
----
-
-## Project Structure
